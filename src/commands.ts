@@ -125,10 +125,10 @@ export class CommandCenter extends Disposable {
 
   @command("omf.start")
   private async start(args?: CommandArgs): Promise<{} | undefined> {
-    const query = await window.showInputBox({
-      value: args && args.state.query,
-      placeHolder: this.placeholder,
-    });
+    const query =
+      path
+        .basename(vscode.window.activeTextEditor?.document.uri.path as string)
+        .split(".", 1)[0] + ".*";
     return this.search({ query: query });
   }
 
@@ -201,17 +201,8 @@ export class CommandCenter extends Disposable {
 
   private async pickFiles(state: State): Promise<{} | undefined> {
     const files = state.files as QuickPickItem[];
-    const items = [
-      new QuickPickItem(
-        `\u21b3 Open ${files.length} file${
-          files.length > 1 ? "s" : ""
-        } matching "${state.query}"`,
-        "omf.openFiles"
-      ),
-      new QuickPickItem(`\u21a9 Go back`, "omf.start"),
-    ].concat(files);
 
-    const pick = await window.showQuickPick(items, { placeHolder: "" });
+    const pick = await window.showQuickPick(files, { placeHolder: "" });
     return (
       pick &&
       (await commands.executeCommand(pick.command, {
